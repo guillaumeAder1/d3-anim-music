@@ -25,7 +25,6 @@
         analyser.connect(context.destination);
         analyser.fftSize = 64;
         frequencyData = new Uint8Array(analyser.frequencyBinCount);
-        analyser.getByteFrequencyData(frequencyData);
         drawing();
     });
 
@@ -61,12 +60,11 @@
         analyser.getByteFrequencyData(frequencyData);
         // remove previous rect
         playerSvg.selectAll('rect').remove();
-
         var color = 'black';
-        // calculate avg
+        // calculate avg for bass freq
         var bassAvg = (frequencyData[0] + frequencyData[1] + frequencyData[2]) / 3;
         bassValues.push(bassAvg);
-        // get some of avg
+        // get sum of avg
         var sum = bassValues.reduce(function(a, b) {
             return a + b;
         });
@@ -74,22 +72,22 @@
         // if current bass value > to global avg value -> color is red
         if (bassAvg > allAvg) {
             color = 'red';
+            // create circle anim in background
             if (animFinish) {
                 animFinish = false;
                 playerSvg.append('circle')
                     .style('stroke', color)
                     .style('opacity', 1)
                     .style('stroke-width', function() { return Math.floor(Math.random() * 10) + 1 })
-                    .style('fill', 'none')
+                    .style('fill', function(){ return (Math.floor(Math.random() * 10) % 2 === 0 ) ? 'none': true; })
                     .attr('r', function() { return Math.floor(Math.random() * 50) })
                     .attr('cx', function() { return Math.floor(Math.random() * 50) * 10; })
                     .attr('cy', function() { return Math.floor(Math.random() * 25) * 10; })
                     .transition().ease(d3.easeSinInOut).duration(250)
-                    .style('opacity', 0)
-                    .attr('r', function() { return Math.floor(Math.random() * 50) })
-                    .on('end', function() {
-                        animFinish = true;
-                    }).remove();
+                        .style('opacity', 0)
+                        .attr('r', function() { return Math.floor(Math.random() * 50) })
+                        .on('end', function() {animFinish = true;})
+                            .remove();
             }
 
 
@@ -100,6 +98,7 @@
         }
 
         for (var i = 0; i < frequencyData.length; i++) {
+            // color in redonly the bass 
             if (i > 2) {
                 color = 'black'
             }
