@@ -1,6 +1,7 @@
 // http://ianreah.com/2013/02/28/Real-time-analysis-of-streaming-audio-data-with-Web-Audio-API.html
 
 (function() {
+    //this.init();
     var svgHeight = 250;
     var svgWidth = 500;
     var playerSvg = d3.select('#svgPlayer').append('svg')
@@ -16,6 +17,7 @@
     var isPlaying = false;
     var ananlyser = null;
     var frequencyData = null;
+    var animFinish = true;
     audioElement.addEventListener("canplay", function() {
         var source = context.createMediaElementSource(audioElement);
         analyser = context.createAnalyser();
@@ -42,32 +44,55 @@
     //         .attr("height", test[i]);
     // }
 
-    init = function() {
-
+    this.init = function() {
+        console.log('inini')
     }
 
 
 
     var drawing = function() {
+        // auto draw
         requestAnimationFrame(drawing);
+        // stop if Pause()
         if (isPlaying) return;
+        // 
         analyser.getByteFrequencyData(frequencyData);
+        // remove previous rect
         playerSvg.selectAll('rect').remove();
-        var color = 'black';
-        var bassAvg = (frequencyData[0] + frequencyData[1] + frequencyData[2]) / 3;
-        bassValues.push(bassAvg)
 
+        var color = 'black';
+        // calculate avg
+        var bassAvg = (frequencyData[0] + frequencyData[1] + frequencyData[2]) / 3;
+        bassValues.push(bassAvg);
+        // get some of avg
         var sum = bassValues.reduce(function(a, b) {
             return a + b;
         });
         var allAvg = sum / bassValues.length;
-
+        // if current bass value > to global avg value -> color is red
         if (bassAvg > allAvg) {
-            color = 'red'
+            color = 'red';
+            if (animFinish) {
+                animFinish = false;
+                playerSvg.append('circle')
+                    .style('stroke', color)
+                    .style('opacity', 1)
+                    .style('stroke-width', function() { return Math.floor(Math.random() * 10) + 1 })
+                    .style('fill', 'none')
+                    .attr('r', function() { return Math.floor(Math.random() * 50) })
+                    .attr('cx', function() { return Math.floor(Math.random() * 50) * 10; })
+                    .attr('cy', function() { return Math.floor(Math.random() * 25) * 10; })
+                    .transition().ease(d3.easeSinInOut).duration(250)
+                    .style('opacity', 0)
+                    .attr('r', function() { return Math.floor(Math.random() * 50) })
+                    .on('end', function() {
+                        animFinish = true;
+                    }).remove();
+            }
+
+
         }
-
-
-        // empty array
+        // empty array 
         if (bassValues.length > 100) {
             bassValues = [];
         }
