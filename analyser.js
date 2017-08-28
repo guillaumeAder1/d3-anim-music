@@ -27,6 +27,8 @@
         drawing();
     });
 
+    var bassValues = [];
+
     /**
      * Test drawing
      */
@@ -46,20 +48,42 @@
 
 
 
-
-
     var drawing = function() {
         requestAnimationFrame(drawing);
         if (isPlaying) return;
         analyser.getByteFrequencyData(frequencyData);
         playerSvg.selectAll('rect').remove();
+        var color = 'black';
+        var bassAvg = (frequencyData[0] + frequencyData[1] + frequencyData[2]) / 3;
+        bassValues.push(bassAvg)
+
+        var sum = bassValues.reduce(function(a, b) {
+            return a + b;
+        });
+        var allAvg = sum / bassValues.length;
+
+        if (bassAvg > allAvg) {
+            color = 'red'
+        }
+
+
+        // empty array
+        if (bassValues.length > 100) {
+            bassValues = [];
+        }
+
         for (var i = 0; i < frequencyData.length; i++) {
+            if (i > 2) {
+                color = 'black'
+            }
             playerSvg.append('rect')
                 .attr("x", (10 * i) + 20)
                 .attr("y", svgHeight - frequencyData[i])
                 .attr("width", 5)
-                .attr("height", frequencyData[i]);
+                .attr("height", frequencyData[i])
+                .style('fill', color);
         }
+
     }
 
     document.addEventListener('keyup', function(e) {
