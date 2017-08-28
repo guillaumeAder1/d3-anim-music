@@ -31,6 +31,8 @@
 
     var bassValues = [];
 
+
+
     /**
      * Test drawing
      */
