@@ -25,7 +25,7 @@
 
         lowPass = context.createBiquadFilter();
         lowPass.type = "lowshelf";
-        lowPass.frequency.value = 1000;
+        lowPass.frequency.value = 100;
         lowPass.gain.value = 25;
 
         source.connect(lowPass);
