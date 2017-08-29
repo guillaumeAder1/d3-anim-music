@@ -18,10 +18,19 @@
     var ananlyser = null;
     var frequencyData = null;
     var animFinish = true;
+    var lowPass = null;
     audioElement.addEventListener("canplay", function() {
         var source = context.createMediaElementSource(audioElement);
         analyser = context.createAnalyser();
-        source.connect(analyser);
+
+        lowPass = context.createBiquadFilter();
+        lowPass.type = "lowshelf";
+        lowPass.frequency.value = 1000;
+        lowPass.gain.value = 25;
+
+        source.connect(lowPass);
+        lowPass.connect(analyser);
+
         analyser.connect(context.destination);
         analyser.fftSize = 64;
         frequencyData = new Uint8Array(analyser.frequencyBinCount);
@@ -79,15 +88,15 @@
                     .style('stroke', color)
                     .style('opacity', 1)
                     .style('stroke-width', function() { return Math.floor(Math.random() * 10) + 1 })
-                    .style('fill', function(){ return (Math.floor(Math.random() * 10) % 2 === 0 ) ? 'none': true; })
+                    .style('fill', function() { return (Math.floor(Math.random() * 10) % 2 === 0) ? 'none' : true; })
                     .attr('r', function() { return Math.floor(Math.random() * 50) })
                     .attr('cx', function() { return Math.floor(Math.random() * 50) * 10; })
                     .attr('cy', function() { return Math.floor(Math.random() * 25) * 10; })
                     .transition().ease(d3.easeSinInOut).duration(250)
-                        .style('opacity', 0)
-                        .attr('r', function() { return Math.floor(Math.random() * 50) })
-                        .on('end', function() {animFinish = true;})
-                            .remove();
+                    .style('opacity', 0)
+                    .attr('r', function() { return Math.floor(Math.random() * 50) })
+                    .on('end', function() { animFinish = true; })
+                    .remove();
             }
 
 
